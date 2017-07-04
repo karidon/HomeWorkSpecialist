@@ -3,6 +3,7 @@
 
 import logging
 
+
 def value_not_none(method):
     def checked_method(self, value):  # не имеет значение это перменная
         if value is None:
@@ -14,15 +15,30 @@ def value_not_none(method):
 
 
 
+# декоратор принимает один аргумент
+def trace_value(loglevel=logging.DEBUG):
+    '''
 
-# Значение свойство такогота будет измено на значение такоето
-# и что это ifo, error , warning
-# logging.log(logging.debug, text)
+    :param loglevel: принимает уровень ошибки
+    :return:
+    '''
+
+    def tracing_method(method):
+        def traced_method(self, value):
+            pname = method.__name__
+            old = getattr(self, pname)
+            msg = 'Property \'{pname}\' will be changed ' \
+                  'from \'{old}\' to \'{value}\''.format(**locals())  # **locals() - все переменные
+            logging.log(loglevel, msg)
+
+            return method(self, value)
+
+        traced_method.__name__ = method.__name__
+        return traced_method
+
+    return tracing_method
 
 
-# 1.10
-
-
-def loging_war(method):
-    def checked_method(self, value):
-        logging.log(1, )
+debug_value = trace_value(logging.DEBUG)
+info_value = trace_value(logging.INFO)
+warn_value = trace_value(logging.WARNING)
